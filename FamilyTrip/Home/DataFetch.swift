@@ -10,18 +10,27 @@ protocol DataFetchDelegate{
     func itemDownloaded(placeDetail:[placeDetail])
 }
 
-class DataFetch: NSObject {
+class DataFetch:NSObject {
     
     var delegate:DataFetchDelegate?
     
-    //單筆景點資料
-    var structRow = placeDetail()
     //存放從資料庫查詢到的景點資料
     var arrTable = [placeDetail]()
-    var webDomain:String = "http://127.0.0.1/FamilyTrip/"
-
+    var webDomain:String = "http://127.0.0.1/FamilyTrip/Home/"
     
     //MARK: -- 自訂method
+    
+    
+    //用輸入的關鍵字搜尋(找 tilte,content,縣市)
+    func get_DataBytime(){
+        //step 1: prepare REQUEST
+        //指定提供XML網路服務的網址
+        let strURL = webDomain + "get_blogdata_json_new.php"
+        //print(strURL)
+        getJson(strURL: strURL)
+    }
+    
+    
     
     //用輸入的關鍵字搜尋(找 tilte,content,縣市)
     func get_DataBykeyword(keyword ky:String){
@@ -75,7 +84,7 @@ class DataFetch: NSObject {
             {
                 //初始化 json資料的解碼器
                 let decoder = JSONDecoder()
-                print("jsonData = \(jsonData!)")
+                //print("jsonData = \(jsonData!)")
                 
                 //讓json解碼器開始解碼json資料到placeDetail結構的陣列中
                 if let jData = jsonData,let placeResults = try? decoder.decode([placeDetail].self, from: jData)
@@ -88,17 +97,16 @@ class DataFetch: NSObject {
                         self.delegate?.itemDownloaded(placeDetail: self.arrTable)
                     }
                 }else{
-                    //print("Json資料解析不出來!!")
+                    print("Json資料解析不出來!!")
+                   
                 }
             }
             else
             {
                 //print("沒有拿到Json資料！！！")
             }
-            
         })
         //執行資料傳輸任務
         dataTask.resume()
     }
-    
 }
