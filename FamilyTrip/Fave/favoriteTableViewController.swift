@@ -11,11 +11,12 @@ var isUserLoggedIn = false
 struct Blog:Codable
 {
     var id = ""
-    var account = ""
-    var photo = ""
+    var user_id = ""
+//    var photo = ""
     var title = ""
-    var phone = ""
-    var address = ""
+    var content = ""
+    var addr1 = ""
+    var blog_id = ""
 }
 
 
@@ -51,16 +52,16 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
         if let user = Auth.auth().currentUser {
             uid = user.uid
             account = user.email!
-            print("user: \(account)")
+            print("user_id: \(uid)")
         }
 //        else{
 //
-//            
+//
 //            let alertController = UIAlertController(title: "警告", message: "請先登入會員", preferredStyle: .alert)
 //            let defaultAction = UIAlertAction(title: "OK", style: .cancel, handler: nil)
 //            alertController.addAction(defaultAction)
 //            present(alertController, animated: true, completion: nil)
-//            
+//
 //        }
 
     }
@@ -68,7 +69,7 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
     //從網路服務讀取JSon資料
     func getDataFromJson()
     {
-        strURL = "select_to_json.php?account=" + account
+        strURL = "select_to_json.php?user_id=" + uid
         url = URL(string: webDomain + strURL)
         //由網路串流物件來“準備”資料傳輸任務
         dataTask = session.dataTask(with: url, completionHandler: {
@@ -84,7 +85,7 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
                 //讓JSon解碼器開始解碼JSon資料到Student結構的陣列中
                 if let jdata = jsonData,let blogResults = try? decoder.decode([Blog].self, from: jdata)
                 {
-//                    print("解碼後的JSon資料\(studentResults)！")
+                    print("解碼後的JSon資料\(blogResults)！")
                     //離線資料集取得解碼過後的資料
                     self.arrTable = blogResults
                     //轉回主執行緒，重整表格資料
@@ -184,37 +185,77 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
     {
         let cell = tableView.dequeueReusableCell(withIdentifier: "favoriteCell", for: indexPath) as! favoriteCell
         
-        print("網址：\(webDomain + arrTable[indexPath.row].photo)")
-        //準備取得大頭照的URL物件
-        url = URL(string: webDomain + arrTable[indexPath.row].photo)
-        //準備大頭照的資料傳輸任務
-        if url != nil
-        {
-            dataTask = session.dataTask(with: url, completionHandler: {
-                imgData, response, error
-                in
-                if error == nil
-                {
-                    //轉回主要執行緒顯示大頭照
-                    DispatchQueue.main.async {
-                        if let picData = imgData
-                        {
-                            cell.blogPicture.image = UIImage(data: picData)
-                        }
+//        print("網址：\(webDomain + arrTable[indexPath.row].photo)")
+//        //準備取得大頭照的URL物件
+//        url = URL(string: webDomain + arrTable[indexPath.row].photo)
+//        //準備大頭照的資料傳輸任務
+//        if url != nil
+//        {
+//            dataTask = session.dataTask(with: url, completionHandler: {
+//                imgData, response, error
+//                in
+//                if error == nil
+//                {
+//                    //轉回主要執行緒顯示大頭照
+//                    DispatchQueue.main.async {
+//                        if let picData = imgData
+//                        {
+//                            cell.blogPicture.image = UIImage(data: picData)
+//                        }
+//                    }
+//                }
+//                else
+//                {
+//                    print("無法取得景點照片：\(error!.localizedDescription)")
+//                }
+//            })
+//            //執行取得大頭照的傳輸任務
+//            dataTask.resume()
+//        }
+        
+        //去資料庫抓圖片
+        //step 1: prepare REQUEST
+        let server_place:String="http://localhost/FamilyTrip/Fave/get_lblob_byuid_fave.php?id=" + arrTable[indexPath.row].blog_id
+        
+        //print("server_place=\(server_place)")
+        let server_url:URL = URL(string:server_place)!
+        let request:URLRequest=URLRequest(url: server_url)
+        
+        //step 2: create Session
+        //跟手機的瀏灠器借session,so use .shared
+        let session:URLSession=URLSession.shared
+        
+        //step 3: create the TASK that you want to do in the session
+        var work:URLSessionDataTask
+        
+        work=session.dataTask(with: request, completionHandler: {
+            (data,respose,error)
+             in
+
+            if error == nil
+            {
+                //轉回主要執行緒顯示照片
+                DispatchQueue.main.async {
+                    if let picData = data
+                    {
+                        cell.blogPicture.image = UIImage(data: picData)
+                        
+                    }else{
+                        cell.blogPicture.image = UIImage(named:"新竹市")
                     }
                 }
-                else
-                {
-                    print("無法取得景點照片：\(error!.localizedDescription)")
-                }
-            })
-            //執行取得大頭照的傳輸任務
-            dataTask.resume()
-        }
+            }
+            else
+            {
+                print("無法取得照片：\(error!.localizedDescription)")
+            }
+        })
+        //step 4:executive the TASK
+        work.resume()
         
         cell.blogTitle.text = arrTable[indexPath.row].title
-        cell.blogPhone.text = arrTable[indexPath.row].phone
-        cell.blogAddr.text = arrTable[indexPath.row].address
+        cell.blogContent.text = arrTable[indexPath.row].content
+        cell.blogAddr.text = arrTable[indexPath.row].addr1
 
         return cell
     }
@@ -240,15 +281,7 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
 //        {
             //step1.先刪除資料庫資料
             //----- to do ------
-          
 
-        
-    
-        
-        
-        
-        
-        
 //            //step2.刪除陣列資料
 //            arrTable.remove(at: indexPath.row)
 //            //step3.刪除儲存格
@@ -273,7 +306,7 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
             let delete = UIContextualAction(style: .normal, title: "刪除此筆收藏") { (action, view, bool) in
                 print("『刪除』按鈕按下")
                 let order = self.arrTable[indexPath.row]
-                let url = URL(string: "http://192.168.0.101/familytrip/delete_json.php?account=\(order.account)&id=\(order.id)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)!
+                let url = URL(string: "http://192.168.0.101/familytrip/Fave/delete_json.php?user_id=\(order.user_id)&blog_id=\(order.blog_id)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)!
                 var request = URLRequest(url: url)
                 request.httpMethod = "DELETE"
                 request.addValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -330,16 +363,16 @@ class favoriteTableViewController: UITableViewController,XMLParserDelegate
         {
         case "id":
             structRow.id = tagContent
-        case "account":
-            structRow.account = tagContent
-        case "photo":
-            structRow.photo = tagContent
         case "title":
             structRow.title = tagContent
-        case "phone":
-            structRow.phone = tagContent
-        case "address":
-            structRow.address = tagContent
+        case "content":
+            structRow.content = tagContent
+//        case "photo":
+//            structRow.photo = tagContent
+        case "addr1":
+            structRow.addr1 = tagContent
+        case "blog_id":
+            structRow.blog_id = tagContent
         case "student": //單筆學生資料結束時
             //將資料加入陣列
             arrTable.append(structRow)

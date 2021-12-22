@@ -62,8 +62,8 @@ class registerViewController: UIViewController {
                                                 let server_place:String = "http://localhost/familytrip/register.php"
                                                 let server_url:URL = URL(string: server_place)!
                                                 var request:URLRequest = URLRequest(url: server_url)
-                                                
-                                                
+                                                let user_id = user.uid
+                                                print(user_id)
                                                 let boundary = UUID().uuidString
                                                 
                                                 // set up request....
@@ -71,6 +71,11 @@ class registerViewController: UIViewController {
                                                 request.httpMethod = "POST"
                                                 request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
                                                 var data = Data()
+                                                // uid part
+                                                data.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
+                                                data.append("Content-Disposition: form-data; name=\"user_id\"\r\n\r\n".data(using: .utf8)!)
+                                                data.append("\(user_id)".data(using: .utf8)!)
+                                                data.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
                                                 // account part
                                                 data.append("\r\n--\(boundary)\r\n".data(using: .utf8)!)
                                                 data.append("Content-Disposition: form-data; name=\"account\"\r\n\r\n".data(using: .utf8)!)
