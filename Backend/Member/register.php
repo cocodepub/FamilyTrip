@@ -6,13 +6,14 @@ $msg = "register_fail";
 $account = $_POST["account"];
 $password = $_POST["password"];
 $username = $_POST["username"];
+$user_id = $_POST["user_id"];
 // $filename = $_FILES["uploadfile"]["name"];
 // $tempname = $_FILES["uploadfile"]["tmp_name"];
 
 $db = mysqli_connect("localhost", "root", "1234", "travel_db");
 // Get all the submitted data from the form
 //$imgData = addslashes(file_get_contents($_FILES['uploadfile']['tmp_name']));
-$sql = "INSERT INTO user (account, password, username) VALUES ('$account','$password','$username');";
+$sql = "INSERT INTO user (user_id, account, password, username) VALUES ('$user_id','$account','$password','$username');";
 // Execute query
 $xxx = mysqli_query($db, $sql);
 mysqli_close($db);
