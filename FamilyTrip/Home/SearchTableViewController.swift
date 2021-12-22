@@ -3,20 +3,9 @@
 //  Travel_home_search
 //
 //  Created by AllyHuang on 2021/11/10.
-//
+
 
 import UIKit
-
-struct placeDetail:Codable
-{
-    var UID:String = ""
-    var title:String = ""
-    var content:String = ""
-    var city:String = ""
-    var dist:String = ""
-    var addr1:String = ""
-}
-
 
 class SearchTableViewController: UITableViewController,DataFetchDelegate {
     
@@ -29,7 +18,6 @@ class SearchTableViewController: UITableViewController,DataFetchDelegate {
     var myData:DataFetch?
     //存放從資料庫查詢到的景點資料
     var arrTable = [placeDetail]()
-    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,11 +37,45 @@ class SearchTableViewController: UITableViewController,DataFetchDelegate {
             {//用關鍵字搜尋
                 self.myData!.get_DataBykeyword(keyword: self.vc.keyword!)
             }
+            //重新載入tableView
             self.tableView.reloadData()
         }
         
         indicate.isHidden = true
     }
+    
+    //*** add by Ally 2021/12/9 ***
+    override func viewDidAppear(_ animated: Bool) {
+        //print("Appear arrTable=\(arrTable.count)")
+        if arrTable.count == 0 {
+            DispatchQueue.main.async
+            {
+                self.alertView(title: "抱歉~ \n無資料可分享!!", message: "資料建構中....")
+            }
+        }
+        
+    }
+    
+    
+    //MARK: -- 自訂method
+    func alertView(title:String, message:String){
+        var popup_controller:UIAlertController
+        popup_controller = UIAlertController(
+            title: title,
+            message: message,
+            preferredStyle: UIAlertController.Style.alert
+        )
+        
+        let button:UIAlertAction = UIAlertAction(
+            title: "OK",
+            style: UIAlertAction.Style.default,
+            handler:nil
+        )
+        
+        popup_controller.addAction(button)
+        present(popup_controller, animated: true, completion: nil)
+    }
+    //*** End add by Ally 2021/12/9 ***
     
     
     //MARK: -- Delegate
@@ -62,7 +84,8 @@ class SearchTableViewController: UITableViewController,DataFetchDelegate {
         arrTable = placeDetail
         
         //回主執行序
-        DispatchQueue.main.async{
+        DispatchQueue.main.async
+        {
             //重新載入tableView
             self.tableView.reloadData()
         }
@@ -89,15 +112,11 @@ class SearchTableViewController: UITableViewController,DataFetchDelegate {
         
         let cell = tableView.dequeueReusableCell(withIdentifier: cellIdentifier, for: indexPath) as! SearchTableViewCell
 
-        
-        //方法二:IOS 15 之後的系統預設儲存格用法
         //宣告儲存內容設定的物件
-        // Configure the cell...
-        
         
         //去資料庫抓圖片
         //step 1: prepare REQUEST
-        let server_place:String="http://127.0.0.1/FamilyTrip/get_lblob_byuid.php?uid=" + arrTable[indexPath.row].UID
+        let server_place:String="http://127.0.0.1/FamilyTrip/Home/get_lblob_byuid.php?uid=" + arrTable[indexPath.row].UID
         
         //print("server_place=\(server_place)")
         let server_url:URL = URL(string:server_place)!
@@ -148,13 +167,6 @@ class SearchTableViewController: UITableViewController,DataFetchDelegate {
         return 270
     }
     
-    
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-       
-        //print("『 \(arrTable[indexPath.row]) 』被點選......")
-
-    }
-
     
     // MARK: - Navigation
 

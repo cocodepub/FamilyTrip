@@ -1,14 +1,14 @@
 //
-//  DetailViewController.swift
-//  Travel_home_search
+//  Detail.swift
+//  FamilyTrip
 //
-//  Created by AllyHuang on 2021/11/15.
+//  Created by AllyHuang on 2021/12/13.
 //
 
 import UIKit
 import MapKit        //引入地圖框架
 
-class DetailViewController: UIViewController {
+class Detail: UIViewController {
     
     @IBOutlet weak var imgViewDetail: UIImageView!
     @IBOutlet weak var labTitle: UILabel!
@@ -16,27 +16,29 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var txtViewContent: UITextView!
     
     
-    //instance properties
-    //接收上一頁的執行實體(從 prepare function 從過來)
-    var searchTVC:SearchTableViewController!
+    //MARK:-- instance properties
+    
+    //接收上一頁ViewController 的執行實體(從 prepare function 從過來)
+    weak var VC:HomeViewController!
     //紀錄上一頁被點選的row
     private var currentRow:Int = 0
     //紀錄目前處理中的景點資料
     var currentData = placeDetail()
     
-        
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+             
+        //HomeViewController 哪個cell被點選
+        currentRow = VC.tableView.indexPathForSelectedRow!.row
         
-    
-        //上一頁哪個cell被點選
-        currentRow = searchTVC.tableView.indexPathForSelectedRow!.row
         //接收上一頁的陣列紀錄當筆資料
-        currentData = searchTVC.arrTable[currentRow]
+        currentData = VC.newTable[currentRow]
+        
         
         //去資料庫抓圖片
         //step 1: prepare REQUEST
-        let server_place:String="http://127.0.0.1/FamilyTrip/Home/get_lblob_byuid.php?uid="+currentData.UID
+        let server_place:String="http://127.0.0.1/FamilyTrip/get_lblob_byuid.php?uid="+currentData.UID
         
         //print("server_place=\(server_place)")
         let server_url:URL = URL(string:server_place)!
@@ -75,7 +77,12 @@ class DetailViewController: UIViewController {
         
         
         labTitle.text = currentData.title
-        labAddr.text = currentData.addr1
+        if currentData.addr1 == ""{
+            labAddr.text = currentData.city+currentData.dist
+        }else{
+            labAddr.text = currentData.addr1
+        }
+        
         txtViewContent.text = currentData.content
     }
     
@@ -122,3 +129,4 @@ class DetailViewController: UIViewController {
     */
 
 }
+
