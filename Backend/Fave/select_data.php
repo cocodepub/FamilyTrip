@@ -11,10 +11,13 @@ $conn = mysqli_connect($host, $user, $password) or die("資料庫連線錯誤！
 mysqli_select_db($conn, $db);
 //指定資料庫使用的編碼
 mysqli_query($conn, "SET NAMES utf8");
-$account = $_GET["account"];
+// $account = $_GET["account"];
+$user_id = $_GET["user_id"];
+
 //存取資料表
 //SELECT no, name, gender, picture, phone, address, email, class FROM student
-$table = mysqli_query($conn, "SELECT id,account,photo,title,phone,address FROM favorite WHERE account = '" . $account . "'");
+// $table = mysqli_query($conn, "SELECT id,account,photo,title,phone,address FROM favorite WHERE account = '" . $account . "'");
+$table = mysqli_query($conn, "SELECT blog.id,`title`,`content`,`photo`,`addr1`,favorite.blog_id FROM `blog` JOIN favorite ON blog.id = favorite.blog_id WHERE blog.`user_id` = '" . $user_id . "'");
 
 //宣告記錄xml資料的變數
 $doc = new DOMDocument('1.0', 'utf-8');
@@ -31,21 +34,21 @@ while ($row_array = mysqli_fetch_row($table)) {
     //第0欄:id
     $column = $row->appendChild($doc->createElement('id'));
     $column->appendChild($doc->createTextNode($row_array[0]));
-    //第1欄:account
-    $column = $row->appendChild($doc->createElement('account'));
-    $column->appendChild($doc->createTextNode($row_array[1]));
-    //第2欄:photo
-    $column = $row->appendChild($doc->createElement('photo'));
-    $column->appendChild($doc->createTextNode($row_array[2]));
-    //第3欄:title
+    //第0欄:id
     $column = $row->appendChild($doc->createElement('title'));
+    $column->appendChild($doc->createTextNode($row_array[1]));
+    //第1欄:account
+    $column = $row->appendChild($doc->createElement('content'));
+    $column->appendChild($doc->createTextNode($row_array[2]));
+    // //第2欄:photo
+    // $column = $row->appendChild($doc->createElement('photo'));
+    // $column->appendChild($doc->createTextNode($row_array[3]));
+    //第3欄:title
+    $column = $row->appendChild($doc->createElement('addr1'));
     $column->appendChild($doc->createTextNode($row_array[3]));
     //第4欄:phone
-    $column = $row->appendChild($doc->createElement('phone'));
+    $column = $row->appendChild($doc->createElement('blog_id'));
     $column->appendChild($doc->createTextNode($row_array[4]));
-    //第5欄:address
-    $column = $row->appendChild($doc->createElement('address'));
-    $column->appendChild($doc->createTextNode($row_array[5]));
 
     $xmlTable->appendChild($row);
 }

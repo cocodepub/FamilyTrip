@@ -27,7 +27,7 @@ function decodeUnicode($str)
 
 // $table = mysqli_query($conn, "delete FROM favorite WHERE id = '" . $_GET["id"] . "'");
 
-$table = mysqli_query($conn, "delete FROM favorite WHERE account = '" . $_GET["account"] . "' and id = '" . $_GET["id"] . "'");
+$table = mysqli_query($conn, "delete FROM favorite WHERE user_id like '%" . $_GET["user_id"] . "%' and blog_id = '" . $_GET["blog_id"] . "'");
 
 //關閉資料庫連結
 mysqli_close($conn);
